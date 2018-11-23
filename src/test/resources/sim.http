@@ -1,0 +1,11 @@
+POST http://localhost:8080/sim
+Content-Type: application/json
+
+{
+  "override": true,
+  "speed": 10,
+  "state": "PLAY",
+  "time": "00:00:00"
+}
+
+###

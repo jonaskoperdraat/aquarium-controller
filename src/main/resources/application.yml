@@ -1,3 +1,8 @@
 logging:
   level:
-    nl.jonaskoperdraat: debug
+    nl:
+      jonaskoperdraat:
+        aquariumcontroller:
+          AquariumControllerApplication: trace
+          model: trace
+          Simulator: debug

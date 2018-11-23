@@ -6,15 +6,13 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nl.jonaskoperdraat.aquariumcontroller.AquariumStateListener;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Flow;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -30,8 +28,7 @@ public class AquariumState {
   Color led2 = new Color(0, 1.0, 0);
 
   @JsonIgnore
-  public static final SubmissionPublisher<AquariumState> PUBLISHER =
-      new SubmissionPublisher<>(Executors.newFixedThreadPool(1), Flow.defaultBufferSize());
+  private Set<AquariumStateListener> listeners = new HashSet<>();
 
   public AquariumState(boolean tl, Color led1, Color led2) {
     this.tl = tl;
@@ -49,58 +46,48 @@ public class AquariumState {
   }
 
   public void setTl(boolean tl) {
-    AquariumState previousState = copy();
     this.tl = tl;
-    notifyOnChange(previousState);
+    publishChange();
   }
 
   public void setLed1(Color led) {
-    AquariumState previousState = copy();
     this.led1 = led;
-    notifyOnChange(previousState);
+    publishChange();
   }
 
   public void setLed2(Color led) {
-    AquariumState previousState = copy();
     this.led2 = led;
-    notifyOnChange(previousState);
+    publishChange();
   }
-
-  @JsonIgnore
-  private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-
-  @JsonIgnore
-  private final Runnable task = new NotifyTask(this);
 
   @JsonIgnore
   private final Set<ScheduledFuture> futures = new HashSet<>();
 
-  private void notifyOnChange(AquariumState previous) {
-    if (!previous.equals(this)) {
-        futures.stream()
-            .filter(Predicate.not(ScheduledFuture::isDone))
-            .filter(Predicate.not(ScheduledFuture::isCancelled))
-            .forEach(f -> {
-              log.debug("cancelling");
-              f.cancel(false);
-            });
-        futures.clear();
-      }
-      log.debug("scheduling");
-      futures.add(scheduledExecutorService.schedule(task, 100, TimeUnit.MILLISECONDS));
-    }
-
-  @Data
-  private static class NotifyTask implements Runnable {
-
-    private final AquariumState aquariumState;
-
-    @Override
-    public void run() {
-      log.info("submitting...");
-      PUBLISHER.submit(aquariumState.copy());
-    }
+  public void addChangeListener(AquariumStateListener listener) {
+    listeners.add(listener);
   }
 
+  public void removeChangeListener(AquariumStateListener listener) {
+    listeners.remove(listener);
+  }
+
+  private void publishChange() {
+    log.trace("publishChange");
+    futures.stream()
+        .filter(Predicate.not(ScheduledFuture::isDone))
+        .filter(Predicate.not(ScheduledFuture::isCancelled))
+        .forEach(f -> {
+          f.cancel(false);
+        });
+    futures.clear();
+    futures.add(Executors.newSingleThreadScheduledExecutor().schedule(
+        () -> {
+          log.debug("notify listeners ({})", listeners);
+          listeners.forEach(listener -> {
+            log.trace("notify listener");
+            listener.stateChanged(this);
+          });
+        }, 100, TimeUnit.MILLISECONDS));
+  }
 
 }
