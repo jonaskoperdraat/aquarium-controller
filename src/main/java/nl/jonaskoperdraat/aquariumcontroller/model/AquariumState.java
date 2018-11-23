@@ -14,7 +14,8 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
+
+import static java.util.function.Predicate.not;
 
 @Data
 @Component
@@ -28,7 +29,10 @@ public class AquariumState {
   Color led2 = new Color(0, 1.0, 0);
 
   @JsonIgnore
-  private Set<AquariumStateListener> listeners = new HashSet<>();
+  private final Set<AquariumStateListener> listeners = new HashSet<>();
+
+  @JsonIgnore
+  private final Set<ScheduledFuture> futures = new HashSet<>();
 
   public AquariumState(boolean tl, Color led1, Color led2) {
     this.tl = tl;
@@ -36,14 +40,15 @@ public class AquariumState {
     this.led2 = led2;
   }
 
-  public boolean getTl() {
-    return tl;
-  }
-
   @JsonIgnore
   public AquariumState copy() {
     return new AquariumState(tl, led1, led2);
   }
+
+  public boolean getTl() {
+    return tl;
+  }
+
 
   public void setTl(boolean tl) {
     this.tl = tl;
@@ -60,8 +65,6 @@ public class AquariumState {
     publishChange();
   }
 
-  @JsonIgnore
-  private final Set<ScheduledFuture> futures = new HashSet<>();
 
   public void addChangeListener(AquariumStateListener listener) {
     listeners.add(listener);
@@ -71,18 +74,19 @@ public class AquariumState {
     listeners.remove(listener);
   }
 
+  /**
+   * Notify any listeners of changes to this state. Waits 100 ms before publishing, so multiple changes in short will be
+   * published as one.
+   */
   private void publishChange() {
     log.trace("publishChange");
-    futures.stream()
-        .filter(Predicate.not(ScheduledFuture::isDone))
-        .filter(Predicate.not(ScheduledFuture::isCancelled))
-        .forEach(f -> {
-          f.cancel(false);
-        });
-    futures.clear();
     futures.add(Executors.newSingleThreadScheduledExecutor().schedule(
         () -> {
           log.debug("notify listeners ({})", listeners);
+          futures.stream()
+              .filter(not(this::equals))
+              .forEach(f -> f.cancel(false));
+          futures.clear();
           listeners.forEach(listener -> {
             log.trace("notify listener");
             listener.stateChanged(this);

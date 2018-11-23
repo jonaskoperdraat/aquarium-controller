@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class Color {
 
-  final double a, b, c;
+  final double r, g, b;
 
 }
