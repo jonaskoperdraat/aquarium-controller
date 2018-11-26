@@ -3,7 +3,7 @@ package nl.jonaskoperdraat.aquariumcontroller.model;
 import lombok.Data;
 
 @Data
-public class Color {
+class Color {
 
   final double r, g, b;
 

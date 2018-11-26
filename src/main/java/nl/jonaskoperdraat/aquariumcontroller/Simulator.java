@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
-
-import static nl.jonaskoperdraat.aquariumcontroller.Simulator.State.PLAY;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -43,51 +43,45 @@ public class Simulator {
   }
 
   public void setOptions(SimulatorOptions options) {
-    this.options = options;
-    if (options.getState() != null && options.getState() == PLAY) {
-      if (options.getTime() != null) {
-        time = options.getTime();
-      }
+    this.options = Objects.requireNonNull(options);
+    if (options.getTime() != null) {
+      time = options.getTime();
     }
+  }
+
+  public void reset() {
+    this.options = null;
   }
 
   @Scheduled(fixedRate = 1000L)
   public void step() {
     log.trace("step start, options: {}", options);
 
-    if (options.getState() != null && options.getState() == PLAY) {
-      log.trace("playing");
-      if (!options.isOverride()) {
-        log.trace("update time to current time");
-        time = LocalTime.now();
-      } else {
-        if (options.getSpeed() == null) {
-          options.setSpeed(1);
-        }
-        log.trace("update time with {} seconds", options.getSpeed());
-        time = time.plus(options.getSpeed(), ChronoUnit.SECONDS);
-
-        var entry = tlSchedule.floorEntry(time);
-        if (entry == null) {
-          entry = tlSchedule.lastEntry();
-        }
-        var tlValue = false;
-        if (entry != null) {
-          tlValue = entry.getValue();
-        }
-
-        if (aquariumState.getTl() != tlValue) {
-          log.trace("switching TL");
-          aquariumState.setTl(tlValue);
-        }
-      }
+    if (options == null) {
+      log.trace("set time to current system time.");
+      time = LocalTime.now();
     } else {
-      log.trace("paused");
+      var speed = Optional.ofNullable(options.getSpeed()).orElse(1);
+      time = time.plus(speed, ChronoUnit.SECONDS);
+      log.trace("adding {} seconds to time (={})", speed, time);
     }
 
-    log.trace
-        ("step finish");
+    // Updating state for current time.
+    var entry = tlSchedule.floorEntry(time);
+    if (entry == null) {
+      entry = tlSchedule.lastEntry();
+    }
+    var tlValue = false;
+    if (entry != null) {
+      tlValue = entry.getValue();
+    }
 
+    if (aquariumState.getTl() != tlValue) {
+      log.trace("switching TL");
+      aquariumState.setTl(tlValue);
+    }
+
+    log.trace("step finish");
   }
 
 }

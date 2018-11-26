@@ -1,17 +1,14 @@
 package nl.jonaskoperdraat.aquariumcontroller.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import nl.jonaskoperdraat.aquariumcontroller.Simulator;
 
 import java.time.LocalTime;
 
-import static nl.jonaskoperdraat.aquariumcontroller.Simulator.State.PLAY;
-
 @Data
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 public class SimulatorOptions {
 
-  boolean override = false;
-  Simulator.State state = PLAY;
   LocalTime time;
   Integer speed;
 

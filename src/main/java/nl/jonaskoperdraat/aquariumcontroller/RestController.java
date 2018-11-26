@@ -52,6 +52,11 @@ public class RestController {
     simulator.setOptions(options);
   }
 
+  @RequestMapping(value = "/sim/reset")
+  public void resetSim(){
+    simulator.reset();
+  }
+
   @RequestMapping(value = "/switchTl")
   public void switchTl() {
     log.trace("/switchTl");

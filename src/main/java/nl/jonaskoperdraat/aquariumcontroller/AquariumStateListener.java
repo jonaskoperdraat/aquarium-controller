@@ -5,7 +5,7 @@ import reactor.core.publisher.FluxSink;
 
 public class AquariumStateListener {
 
-  private AquariumState aquariumState;
+  private final AquariumState aquariumState;
   private FluxSink<AquariumState> emitter;
 
   AquariumStateListener(AquariumState state) {

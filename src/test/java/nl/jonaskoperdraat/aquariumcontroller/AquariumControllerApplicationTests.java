@@ -11,6 +11,7 @@ public class AquariumControllerApplicationTests {
 
 	@Test
 	public void contextLoads() {
+		// Context initialization test
 	}
 
 }
