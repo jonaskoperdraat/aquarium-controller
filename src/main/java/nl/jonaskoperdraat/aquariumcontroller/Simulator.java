@@ -3,6 +3,7 @@ package nl.jonaskoperdraat.aquariumcontroller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.jonaskoperdraat.aquariumcontroller.model.AquariumState;
+import nl.jonaskoperdraat.aquariumcontroller.model.Color;
 import nl.jonaskoperdraat.aquariumcontroller.model.SimulatorOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,6 +13,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.TreeMap;
 
 @Component
@@ -38,18 +40,18 @@ public class Simulator {
 
   private LocalTime time = LocalTime.now();
 
-  public LocalTime getTime() {
+  LocalTime getTime() {
     return time;
   }
 
-  public void setOptions(SimulatorOptions options) {
+  void setOptions(SimulatorOptions options) {
     this.options = Objects.requireNonNull(options);
     if (options.getTime() != null) {
       time = options.getTime();
     }
   }
 
-  public void reset() {
+  void reset() {
     this.options = null;
   }
 
@@ -82,6 +84,13 @@ public class Simulator {
     }
 
     log.trace("step finish");
+  }
+
+  @Scheduled(fixedRate = 5000L)
+  public void randomizeLeds() {
+    Random random = new Random();
+    aquariumState.setLed1(new Color(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+    aquariumState.setLed2(new Color(random.nextDouble(), random.nextDouble(), random.nextDouble()));
   }
 
 }
