@@ -1,0 +1,7 @@
+<h2>Current state</h2>
+<div class="container" *ngIf="state$ | async; let state">
+  <div class="tl" id="tl" [ngClass]="{'on': state.tl}">{{state.tl ? 'on' : 'off'}}</div>
+  <div class="led" *ngFor="let led of [state.led1, state.led2]">
+    <div class="swatch" [ngStyle]="{'background-color': led | cssRgb}"></div>
+    <span>{{led | txtRgb}}</span></div>
+</div>

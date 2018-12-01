@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 @org.springframework.web.bind.annotation.RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequestMapping("/api")
 @Slf4j
 public class RestController {
 

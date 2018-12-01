@@ -1,0 +1,40 @@
+.container{
+  background-color: #333;
+  overflow: hidden;
+}
+
+.container > div {
+  float: left;
+}
+
+.tl {
+  color: #888;
+  width : 80%;
+  height : 50px;
+  margin : 20px 10%;
+  border: 1px solid grey;
+  background-color: dimgray;
+  text-align : center;
+}
+
+.tl.on {
+  background-color: white;
+}
+
+.led {
+  width : 50%;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.led span {
+  color: #888;
+  margin: 0 auto;
+}
+
+.led .swatch {
+  width : 30px;
+  height : 30px;
+  border-radius: 15px;
+  margin : 0 auto 1em;
+}
