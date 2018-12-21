@@ -13,7 +13,7 @@ const timeUrl = '/api/sim/time';
 export class StateService {
 
   stateSubject: Subject<AquariumState>;
-  timeSubject: Subject;
+  timeSubject: Subject<any>;
 
   constructor() {
     StateService.log("constructor");

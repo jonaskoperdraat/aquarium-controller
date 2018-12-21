@@ -1,0 +1,31 @@
+<div *ngFor="let key of keys()" class="schedule">
+  <div class="schedule-name">{{key}}</div>
+  <div class="timeline">
+    <div *ngFor="let marker of schedule(key).markers" class="marker"
+         [ngStyle]="{left : (marker.time | percentageOfDay)+'%'}">
+      <form>
+        <mat-form-field>
+          <input
+            matInput
+            placeHolder="time"
+            title="time"
+            type="text"
+            name="time"
+            #time="ngModel"
+            [ngModel]="marker.time | time"
+            (ngModelChange)="time.valid && updateTime(marker, $event)"
+            pattern="^\d{1,2}:\d{2}$"
+          >
+        </mat-form-field>
+        <mat-slide-toggle *ngIf="schedule(key).type === 'on/off'"
+          [checked]="marker.value === 'on'"
+          (change)="marker.value = $event.checked ? 'on' : 'off'"
+          >on/off
+        </mat-slide-toggle>
+      </form>
+    </div>
+  </div>
+</div>
+<pre>
+  {{model | json}}
+</pre>

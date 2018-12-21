@@ -6,7 +6,7 @@ import {StateService} from "../state.service";
 @Component({
   selector: 'app-state-display',
   templateUrl: './state-display.component.html',
-  styleUrls: ['./state-display.component.css']
+  styleUrls: ['./state-display.component.scss']
 })
 export class StateDisplayComponent implements OnInit {
 
