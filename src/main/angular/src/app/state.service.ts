@@ -5,13 +5,15 @@ import {AquariumState, Color} from "./state-display/state";
 import * as oboe from 'oboe';
 
 const stateUrl = '/api/state';
+const timeUrl = '/api/sim/time';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StateService {
 
-  stateSubject: Subject = new Subject();
+  stateSubject: Subject<AquariumState>;
+  timeSubject: Subject;
 
   constructor() {
     StateService.log("constructor");
@@ -21,7 +23,7 @@ export class StateService {
   private init(): void {
     StateService.log("init");
     this.stateSubject = new Subject();
-    const subject = this.stateSubject;
+    const stateSubject = this.stateSubject;
     const service = this;
     oboe({
       'url': stateUrl,
@@ -32,15 +34,31 @@ export class StateService {
           s.tl,
           new Color(s.led1.r, s.led1.g, s.led1.b),
           new Color(s.led2.r, s.led2.g, s.led2.b));
-        subject.next(aquariumState);
+        stateSubject.next(aquariumState);
       }
     ).fail(function(reason) {
       service.handleError('init')(reason);
     });
+
+    const timeSubject = this.timeSubject;
+    oboe({
+      'url': timeUrl,
+      'method': 'GET'
+    }).start(function(s) {
+      console.log("started receiving time.");
+    }).on('string', function(s) {
+      console.log('received', s);
+      }
+    )
+    //"17:02:03.361287"
   }
 
   getState(): Observable<AquariumState> {
     return this.stateSubject;
+  }
+
+  getTime(): Observable<any> {
+    return this.timeSubject;
   }
 
   private handleError(operation = 'operation') {

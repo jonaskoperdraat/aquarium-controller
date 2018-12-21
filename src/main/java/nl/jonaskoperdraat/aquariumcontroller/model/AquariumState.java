@@ -82,7 +82,7 @@ public class AquariumState {
     log.trace("publishChange");
     futures.add(Executors.newSingleThreadScheduledExecutor().schedule(
         () -> {
-          log.debug("notify listeners ({})", listeners);
+          log.trace("notify listeners ({})", listeners);
           futures.stream()
               .filter(not(this::equals))
               .forEach(f -> f.cancel(false));

@@ -3,6 +3,6 @@ logging:
     nl:
       jonaskoperdraat:
         aquariumcontroller:
-          AquariumControllerApplication: trace
-          model: trace
+          AquariumControllerApplication: debug
+          model: debug
           Simulator: debug

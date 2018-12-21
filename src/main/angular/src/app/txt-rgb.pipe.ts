@@ -12,7 +12,7 @@ export class TxtRgbPipe implements PipeTransform {
   }
 
   private format(value: number) {
-    return formatNumber(value, 'en_US', '1.0-2');
+    return formatNumber(value, 'en_US', '1.0-3');
   }
 
 }

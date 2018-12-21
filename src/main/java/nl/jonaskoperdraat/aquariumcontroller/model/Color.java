@@ -7,4 +7,8 @@ public class Color {
 
   final double r, g, b;
 
+  public static Color of(double r, double g, double b) {
+    return new Color(r, g, b);
+  }
+
 }
